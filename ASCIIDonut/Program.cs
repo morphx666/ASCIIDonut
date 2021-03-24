@@ -52,6 +52,10 @@ namespace ASCIIDonut {
                         output = new char[conWidth, conHeight]; // = ' ';
                         zBuffer = new double[conWidth, conHeight]; // = 0;
                         conBuffer = new byte[conWidth * conHeight];
+
+                        for(int y = 0; y < conHeight; y++)
+                            for(int x = 0; x < conWidth; x++)
+                                output[x, y] = ' ';
                     }
 
                     A += 0.07;
@@ -71,13 +75,6 @@ namespace ASCIIDonut {
             // precompute sines and cosines of A and B
             double cosA = Math.Cos(A), sinA = Math.Sin(A);
             double cosB = Math.Cos(B), sinB = Math.Sin(B);
-
-            for(int x = 0; x < conWidth; x++) {
-                for(int y = 0; y < conHeight; y++) {
-                    output[x, y] = ' ';
-                    zBuffer[x, y] = 0;
-                }
-            }
 
             // theta goes around the cross-sectional circle of a torus
             for(double theta = 0; theta < 2 * Math.PI; theta += thetaSpacing) {
@@ -103,7 +100,7 @@ namespace ASCIIDonut {
                     double z = K2 + cosA * circleX * sinPhi + circleY * sinA;
                     double ooz = 1.0 / z;  // "one over z"
 
-                    // calculate luminance.  ugly, but correct.
+                    // calculate luminance. ugly, but correct.
                     double L = cosPhi * cosTheta * sinB - cosA * cosTheta * sinPhi -
                                sinA * sinTheta + cosB * (cosA * sinTheta - 
                                                          cosTheta * sinA * sinPhi);
@@ -137,9 +134,12 @@ namespace ASCIIDonut {
             // bring cursor to "home" location, in just about any currently-used
             // terminal emulation mode
             Console.SetCursorPosition(0, 0);
-            for(int j = 0; j < conHeight; j++) {
-                for(int i = 0; i < conWidth; i++) {
-                    conBuffer[i + j * conWidth] = (byte)output[i, j];
+            for(int y = 0; y < conHeight; y++) {
+                for(int x = 0; x < conWidth; x++) {
+                    conBuffer[x + y * conWidth] = (byte)output[x, y];
+
+                    output[x, y] = ' ';
+                    zBuffer[x, y] = 0;
                 }
             }
             stdOut.Write(conBuffer, 0, conBuffer.Length - 1);
